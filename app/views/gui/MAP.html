@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/lib/w3.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>Map</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 80%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+      
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #source #destination {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 800px;
+      }
+
+      #source #destination:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+    </style>
+    
+    <style>
+        .mySlides {display:none;}
+          .topcorner{
+          position:absolute;
+         top:22px;
+         right:45px;
+         }
+  
+        input.btn btn-default {
+          background-image: url(/Images/6.png); /* 16px x 16px */
+          background-color: transparent; /* make the button transparent */
+            background-repeat: no-repeat;  /* make the background image appear only once */
+            background-position: 0px 0px;  /* equivalent to 'top left' */
+            border: none;           /* assuming we don't want any borders */
+            cursor: pointer;        /* make the cursor like hovering over an <a> element */
+            height: 100px;           /* make this the size of your image */
+            padding-left: 100px;     /* make text start to the right of the image */
+            vertical-align: middle; /* align the text vertically centered */
+        }
+
+
+
+    </style>
+    <style>
+        .image-checkbox
+        {
+            cursor: pointer;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            border: 4px solid transparent;
+            outline: 2;
+        }
+
+        .image-checkbox input[type="checkbox"]
+        {
+            display: none;
+        }
+
+        .image-checkbox-checked
+        {
+            border-color: #A9A9A9;
+        }
+        
+    
+        footer {
+            background-color: #FFF;
+            position:center;
+            bottom: 0px;
+            width: 100%;
+            text-align: center;
+        }
+        
+.input_hidden {
+    position: absolute;
+    left: auto;
+}
+
+.selected {
+    background-color: #ccc;
+}
+
+#transport label {
+    display: inline-block;
+    cursor: pointer;
+}
+
+#transport label img {
+    padding: 5px;
+}
+input[type="radio"]{
+    visibility:hidden;
+}
+
+
+
+
+
+label.bus:before {
+    content: "";
+    border: 10px solid #ffff;
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 10px;
+    background-color: #ffffff;
+}
+
+
+input[type="radio"]:checked + label.bus:before {
+    content: "\2714";
+    font-size: 15px;
+    color: blue;
+    line-height: 15px;
+    margin-left:10px; 
+    margin-top: 15px;
+}
+
+input[type="radio"]:checked + label.bus:after {
+    border: 10px solid #ffff;
+}
+label.Metro:before {
+    content: "";
+    border: 10px solid #ffff;
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 10px;
+    background-color: #ffffff;
+}
+
+
+input[type="radio"]:checked + label.Metro:before {
+    content: "\2714";
+    font-size: 15px;
+    color: blue;
+    line-height: 15px;
+    margin-left:10px; 
+    margin-top: 15px;
+}
+
+input[type="radio"]:checked +label.Metro:after {
+    border: 10px solid #ffff;
+}label.car_cab:before {
+    content: "";
+    border: 10px solid #ffff;
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 10px;
+    background-color: #ffffff;
+}
+
+
+input[type="radio"]:checked +label.car_cab:before {
+    content: "\2714";
+    font-size: 15px;
+    color: blue;
+    line-height: 15px;
+    margin-left:10px; 
+    margin-top: 15px;
+}
+
+input[type="radio"]:checked + label.car_cab:after {
+    border: 10px solid #ffff;
+}label.walk:before {
+    content: "";
+    border: 10px solid #ffff;
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 10px;
+    background-color: #ffffff;
+}
+
+
+input[type="radio"]:checked +label.walk:before {
+    content: "\2714";
+    font-size: 15px;
+    color: blue;
+    line-height: 15px;
+    margin-left:10px; 
+    margin-top: 15px;
+}
+
+input[type="radio"]:checked +label.walk:after {
+    border: 10px solid #ffff;
+}
+    </style>
+</head>
+  
+<body>
+    <form action="" method="post" enctype="multipart/form-data">
+    <div>
+        <input id="source" class="controls" type="text" placeholder="Source" style="width:320px"/>
+        <input id="destination" class="controls" type="text" placeholder="Destination"style="width:320px"/>
+        <button type="button" id="buttn" value="Go" class="btn btn-primary btn-sm" onclick="getData()">Go</button> 
+    </div>  
+    </form>
+
+   </br>
+   
+    <div class="text-top">
+          <label for="How You Want..!" class="control-label input-group">Categorize It..! &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Transport:</label>
+                <div class="btn-group" data-toggle="buttons" >
+			<label class="btn btn-default">
+				<input name="how" value="Safer" type="radio">Safer</label>
+			<label class="btn btn-default">
+				<input name="how" value="Quicker" type="radio">Quicker</label>
+			<label class="btn btn-default">
+				<input name="how" value="Cost" class="active" type="radio">Cost</label>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>    
+              
+                <label id="latbox">
+                            <input type="radio" name="transport" value="Metro" id="Metro" checked="checked"/>
+                            <label for="Metro" class="Metro"> <img src="Images/index.png"style="width:50px"/></label>
+                            
+                            <input type="radio" name="transport" value="car_cab" id="car_cab"/>
+                            <label for="car_cab" class="car_cab"><img src="Images/index2.png" style="width:50px"/></label>
+                            
+                            <input type="radio" name="transport" value="bus" id="bus"/>
+                            <label for="bus" class="bus"><img src="Images/index3.png" style="width:50px"/></label>
+                        
+                           
+                            <input type="radio" name="transport" value="walk" id="walk" />
+                             <label for="walk" class="walk"> <img src="Images/index5.png" style="width:40px"style="hieght:15px" /></label>
+                </label>       
+                       
+              
+                </div>
+<div id="info"></div>
+ 
+    <div align="right">  
+        <strong>
+            <span id="time"><time datetime="YYYY-MM-DDThh:mm:ssTZD"></span>
+        </strong>           
+    </div>
+    <div class="topcorner" style="max-width:100px">
+        <img class="mySlides" src="Images/6.png" style="width:130%">
+        <img class="mySlides" src="Images/5.gif" style="width:130%">
+        <img class="mySlides" src="Images/images1.jpg" style="width:130px">
+        <img class="mySlides" src="Images/3.jpg" style="width:130%">
+        <img class="mySlides" src="Images/2.jpg" style="width:130%">
+        <img class="mySlides" src="Images/1.jpg" style="width:130%">
+    </div>
+    
+  
+   <div>
+       <input type="button" id="btn" onclick="getLoc()" value="@"/>
+   </div>
+   <p id="demo"></p>
+   <a href="https://maps.googleapis.com/maps/api/geocode/json?src=AAAAAAA&key=AIzaSyDTDRb9h12V35xCNnfM-BDnfdU-ltjXWK8" >click here</a>
+    <div id="map"></div>
+    
+    
+    
+
+    <script type="text/javascript">
+        
+        
+        /* Checkboxes*/
+        
+        jQuery(function ($) {
+     // init the state from the input
+            $(".image-checkbox").each(function () {
+                if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
+                    $(this).addClass('image-checkbox-checked');
+                }
+                else {
+                    $(this).removeClass('image-checkbox-checked');
+                }
+            });
+
+        // sync the state to the input
+            $(".image-checkbox").on("click", function (e) {
+              
+                if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
+                      $(this).removeClass('image-checkbox-checked').prop("checked",false);
+                         $(this).find('input[type="checkbox"]').first().removeAttr("checked",true);
+                         //$(this).removeClass('image-checkbox-checked').prop;
+  }
+                else {
+                    $(this).addClass('image-checkbox-checked');
+                    $(this).find('input[type="checkbox"]').first().attr("checked", "checked");
+                }
+
+                e.preventDefault();
+            });
+            // and attach a click event handler 
+        
+ 
+ });
+  
+    
+   
+        /*IMAGE SLIDER*/
+   
+        var myIndex = 0;
+        carousel();
+
+        function carousel() {
+            var i;
+            var x = document.getElementsByClassName("mySlides");
+            for (i = 0; i < x.length; i++) {
+               x[i].style.display = "none";  
+            }
+            myIndex++;
+            if (myIndex > x.length) {myIndex = 1}    
+            x[myIndex-1].style.display = "block";  
+            setTimeout(carousel, 10000); // Change image every 2 seconds
+        }
+
+        // This example adds a search box to a map, using the Google Place Autocomplete
+        // feature. People can enter geographical searches. The search box will return a
+        // pick list containing a mix of places and predicted search terms.
+
+        // This example requires the Places library. Include the libraries=places
+        // parameter when you first load the API. For example:
+        // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+
+     /*  function show(){
+                 alert($('input[name=how]:checked').val());
+
+              //alert($(this).serialize());
+
+                return false;
+             }*/
+             
+       function initAutocomplete() {
+                 var map;
+//initialize();
+
+	
+
+                var today = new Date();
+                document.getElementById('time').innerHTML=today.toLocaleString();
+                var map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat:12.94369041, lng: 77.57691979},
+                zoom: 13,
+                
+              });
+
+google.maps.event.addListener(map, 'click', function(event) {
+   placeMarker(event.latLng);
+});
+
+function placeMarker(location) {
+    var marker = new google.maps.Marker({
+        position: location, 
+        map: map
+    });
+var long,latt;
+google.maps.event.addListener(marker, 'mouseout', function(evt){
+   //alert( evt.latLng.lng()+","+evt.latLng.lat());
+long=evt.latLng.lng();
+latt=evt.latLng.lat();
+//alert(long+","+latt);
+
+ /*var ExcelApp = new ActiveXObject("Excel.Application");
+ ExcelApp.Workbooks.Open("E:\TEST.xlsx");
+ var i=2;
+       var ExcelSheet = new ActiveXObject("Excel.Sheet");
+
+       ExcelSheet.ActiveSheet.Cells(i,2).Value = long;
+       ExcelSheet.ActiveSheet.Cells(i,3).Value =latt;
+       i=i+1;
+      ExcelApp.save;
+       ExcelSheet.Application.Quit();*/
+       var fso = new ActiveXObject("Scripting.FileSystemObject");
+var s = fso.OpenTextFile("E:\\test.txt",8,true);
+//var s1 = fso.OpenTextFile("E:\\test1.txt",8,true);
+s.WriteLine(long);
+//s1.WrieLine(latt);
+s.Close();
+//s1.Close();
+var s1= fso.OpenTextFile("E:\\test1.txt",8,true);
+//var s1 = fso.OpenTextFile("E:\\test1.txt",8,true);
+s1.WriteLine(latt);
+//s1.WrieLine(latt);
+s1.Close();
+
+});
+
+}
+            	  
+/*var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+var mapOptions = {
+  zoom: 4,
+  center: myLatlng
+}
+var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+// Place a draggable marker on the map
+var marker = new google.maps.Marker({
+    position: myLatlng,
+    map: map,
+    draggable:true,
+    title:"Drag me!"
+});*/
+
+              // Create the search box and link it to the UI element.
+              var src = document.getElementById('source');
+              var dest = document.getElementById('destination');
+              var buton=document.getElementById('btn');
+              var sr=src.value;
+              var ds=dest.value;
+           //   alert(sr);
+             // alert(src);
+              var searchBox = new google.maps.places.SearchBox(src);
+              var searchBox1 = new google.maps.places.SearchBox(dest);
+
+    
+
+
+                //document.body.innerHTML=src.;
+              //map.controls[google.maps.ControlPosition.TOP_LEFT].push(src);
+             //  map.controls[google.maps.ControlPosition.TOP_LEFT].push(butn);
+
+              // Bias the SearchBox results towards current map's viewport.
+              map.addListener('bounds_changed', function() {
+                searchBox.setBounds(map.getBounds());
+                searchBox1.setBounds(map.getBounds());
+              });
+
+              var markers = [];
+              // Listen for the event fired when the user selects a prediction and retrieve
+              // more details for that place.
+              searchBox.addListener('places_changed', function() {
+                var places = searchBox.getPlaces();
+      
+                if (places.length == 0) {
+
+                  return;
+                }
+
+                // Clear out the old markers.
+               /* markers.forEach(function(marker) {
+                  marker.setMap(null);
+                });
+                markers = [];*/
+
+                // For each place, get the icon, name and location.
+            //  var bounds = new google.maps.LatLngBounds();
+               /* places.forEach(function(place) {
+                  if (!place.geometry) {
+                    console.log("Returned place contains no geometry");
+                    return;
+                  }
+                  var icon = {
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                  };
+
+                  // Create a marker for each place.
+                  markers.push(new google.maps.Marker({
+                    map: map,
+                    icon: icon,
+                    title: place.name,
+                    position: place.geometry.location
+                  }));
+
+                  if (place.geometry.viewport) {
+                    // Only geocodes have viewport.
+                    bounds.union(place.geometry.viewport);
+                  } else {
+                    bounds.extend(place.geometry.location);
+                  }
+                });*/
+                map.fitBounds(bounds);
+              });
+
+              searchBox1.addListener('places_changed', function() {
+                var places1 = searchBox1.getPlaces();
+
+                if (places1.length == 0) {
+                  return;
+                }
+
+                // Clear out the old markers.
+                markers.forEach(function(marker) {
+                  marker.setMap(null);
+                });
+                markers = [];
+
+                // For each place, get the icon, name and location.
+               /* var bounds = new google.maps.LatLngBounds();
+                places.forEach(function(place) {
+                  if (!place.geometry) {
+                    console.log("Returned place contains no geometry");
+                    return;
+                  }
+                  var icon = {
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                  };
+
+                  // Create a marker for each place.
+                  markers.push(new google.maps.Marker({
+                    map: map,
+                    icon: icon,
+                    title: place.name,
+                    position: place.geometry.location
+                  }));
+
+                  if (place.geometry.viewport) {
+                    // Only geocodes have viewport.
+                    bounds.union(place.geometry.viewport);
+                  } else {
+                    bounds.extend(place.geometry.location);
+                  }
+                });*/
+                map.fitBounds(bounds);
+              });
+            }
+      
+    function getLoc()
+    {
+       
+                var map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 22, lng:77},
+                zoom: 5
+                
+              });
+
+        var infoWindow = new google.maps.InfoWindow({map: map});
+
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+                        var src = document.getElementById('source');
+             // var dest = document.getElementById('destination');
+             // var buton=document.getElementById('btn');
+              var sr=src.value;
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            infoWindow.setPosition(pos);
+            infoWindow.setContent('Your Location ..!');
+            map.setCenter(pos);
+          }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+      
+
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+      }
+
+
+    }
+    var directionsService;
+    var directionsDisplay;
+    function getData(){
+        var srcVal=document.getElementById("source").value;
+        var destVal=document.getElementById("destination").value;
+        var optRad=$('input[name=how]:checked').val();
+         var optTrans=$('input[name=transport]:checked').val();
+  
+directionsService = new google.maps.DirectionsService;
+         directionsDisplay = new google.maps.DirectionsRenderer;
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 22, lng: 77},
+                zoom: 5
+         
+        });
+        directionsDisplay.setMap(map);
+
+         
+       
+      //  document.getElementById('destination').addEventListener('onchange', onChangeHandler);
+      }
+       document.getElementById('buttn').addEventListener('click',function() {
+         // document.getElementById("demo").innerHTML = "Hello World"; 
+          calculateAndDisplayRoute(directionsService, directionsDisplay);
+          
+         
+        });
+
+      function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+        //document.getElementById("demo").innerHTML = "Hello World"; 
+        //alert("hh");
+        directionsService.route({
+          origin: document.getElementById('source').value,
+          destination: document.getElementById('destination').value,
+          travelMode: 'DRIVING',
+           optimizeWaypoints: true,
+          transitOptions: {
+                      departureTime: new Date(),
+                      modes: ['BUS']
+                     
+                      
+                }
+        }, function(response, status) {
+          if (status === 'OK') {
+            directionsDisplay.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+ var srce=document.getElementById('source').value;
+  var dstt=destination: document.getElementById('destination').value;     
+xhr = new XMLHttpRequest();
+var url = "url?data=" + encodeURIComponent(JSON.stringify({"source":srce,"destination":dstt}));
+xhr.open("GET", url, true);
+xhr.setRequestHeader("Content-type", "application/json");
+xhr.onreadystatechange = function () { 
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        var json = JSON.parse(xhr.responseText);
+        console.log(json.source + ", " + json.destination)
+    }
+}
+xhr.send();
+        
+       
+       
+    }
+    
+function collect()
+{
+
+	}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTDRb9h12V35xCNnfM-BDnfdU-ltjXWK8&libraries=places&callback=initAutocomplete"
+            async defer></script>
+         <footer align="center">© Copyright 2017, All Rights Reserved</footer>
+</body>
+</html>
+   
+        
