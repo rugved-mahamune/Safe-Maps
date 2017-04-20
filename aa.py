@@ -1,14 +1,37 @@
+# Copyright (c) 2012, Ryan Gomba
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are those
+# of the authors and should not be interpreted as representing official policies, 
+# either expressed or implied, of the FreeBSD Project.
 import csv
 import math
 import json
-from haversine import haversine # latitude and longitude
-from pysal.cg.kdtree import KDTree 
-from pysal.cg.sphere import RADIUS_EARTH_KM
 import pdb
-import numpy
-import sqlite3
+################################################################################
+# POINT
+################################################################################
 
-locs = numpy.array([[12.9232842072,77.5934100151]])
 class Point:
     
     def __init__(self, latitude, longitude):
@@ -27,7 +50,8 @@ class Point:
         
         # convert coordinates to radians
         
-        p1_lat, p1_lon, p2_lat, p2_lon = [math.radians(c) for c in self.latitude, self.longitude, point.latitude, point.longitude]
+        p1_lat, p1_lon, p2_lat, p2_lon = [math.radians(c) for c in
+            self.latitude, self.longitude, point.latitude, point.longitude]
         
         numerator = math.sqrt(
             math.pow(math.cos(p2_lat) * math.sin(p2_lon - p1_lon), 2) +
@@ -159,30 +183,19 @@ class Optics:
     # --------------------------------------------------------------------------
     
     def _neighbors(self, point):
-        tree = KDTree(locs, leafsize=10, radius=RADIUS_EARTH_KM)
-        # get points from KDTree
-        neb = []
-        toQuery = ([point.latitude,point.longitude])
-        d,i = tree.query(toQuery, k=5, distance_upper_bound=self.max_radius/100000.0)
-        arr = i.tolist()
-        arr.pop(0)
-        for itera in arr:
-            if(itera < len(locs)):
-                neb.append(Point(locs[itera][0],locs[itera][1]))
-    #        print itera
-        #pdb.set_trace()
-        return [p for p in self.points if p is not point and
+        a = [p for p in self.points if p is not point and
             p.distance(point) <= self.max_radius]
+        pdb.set_trace()
+        return a
             
     # --------------------------------------------------------------------------
     # mark a point as processed
     # --------------------------------------------------------------------------
         
     def _processed(self, point):
-        #pdb.set_trace()
+    
         point.processed = True
-        if(point in self.unprocessed):
-            self.unprocessed.remove(point)
+        self.unprocessed.remove(point)
         self.ordered.append(point)
     
     # --------------------------------------------------------------------------
@@ -293,65 +306,27 @@ class Optics:
 # LOAD SOME POINTS
 
 points = []
-with open('Jayanagar.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        points.append(Point(float(row[0]),float(row[1])))
-        lat = float(row[0])
-        longi = float(row[1])
-        locs = numpy.concatenate((locs,numpy.array([[lat,longi]])))
 with open('Basavangudi.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        points.append(Point(float(row[0]),float(row[1])))
-        lat = float(row[0])
-        longi = float(row[1])
-        locs = numpy.concatenate((locs,numpy.array([[lat,longi]])))
-with open('Madivala.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        points.append(Point(float(row[0]),float(row[1])))
-        lat = float(row[0])
-        longi = float(row[1])
-        locs = numpy.concatenate((locs,numpy.array([[lat,longi]])))
-with open('KSLayout.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        points.append(Point(float(row[0]),float(row[1])))
-        lat = float(row[0])
-        longi = float(row[1])
-        locs = numpy.concatenate((locs,numpy.array([[lat,longi]])))
-#pdb.set_trace()
+	reader = csv.reader(csvfile)
+	for row in reader:
+		points.append(Point(float(row[1]),float(row[0])))
 optics = Optics(points, 100, 3) # 100m radius for neighbor consideration, cluster size >= 2 points
 optics.run()                    # run the algorithm
-clusters = optics.cluster(50)   # 50m threshold for clustering
+clusters = optics.cluster(100)   # 50m threshold for clustering
 # for cluster in clusters:
 #     for pts in cluster.points:
-#       print str(pts.latitude)+','+str(pts.longitude)
+# 	   	print str(pts.latitude)+','+str(pts.longitude)
 #     print ""
 # print len(clusters)
-db1 = sqlite3.connect("clusters.db")
-c = db1.cursor()
-c.execute('''DROP TABLE IF EXISTS clusters''')
-c.execute('''CREATE TABLE clusters(raduis real, lat real, longi real, points number)''')
-
 for cluster in clusters:
-    maxRadius = -1
-    clusterCenterLati = 0.0
-    clusterCenterLongi = 0.0
-    for pt1 in cluster.points:
-        for pt2 in cluster.points:
-            thisRaduis = pt1.distance(pt2)
-            if maxRadius < thisRaduis:
-                maxRadius = thisRaduis
-                clusterCenterLati = (pt1.latitude + pt2.latitude)/2.0
-                clusterCenterLongi = (pt1.longitude + pt2.longitude)/2.0
-    print str(maxRadius)+","+str(clusterCenterLati)+","+str(clusterCenterLongi)+","+str(len(cluster.points))
-    c.execute("INSERT INTO clusters VALUES (?, ?, ?, ?);", (maxRadius,clusterCenterLati,clusterCenterLongi,len(cluster.points)))
-# Save (commit) the changes
-db1.commit()
-c.execute('SELECT * FROM clusters')
-print c.fetchone()
-# We can also close the connection if we are done with it.
-# Just be sure any changes have been committed or they will be lost.
-db1.close()
+	maxRadius = -1
+	clusterCenterLati = 0.0
+	clusterCenterLongi = 0.0
+	for pt1 in cluster.points:
+		for pt2 in cluster.points:
+			thisRaduis = pt1.distance(pt2)
+			if maxRadius < thisRaduis:
+				maxRadius = thisRaduis
+				clusterCenterLati = (pt1.latitude + pt2.latitude)/2.0
+				clusterCenterLongi = (pt1.longitude + pt2.longitude)/2.0
+	print str(maxRadius)+","+str(clusterCenterLati)+","+str(clusterCenterLongi)
